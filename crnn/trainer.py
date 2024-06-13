@@ -60,7 +60,6 @@ class TrainerOpt:
         parser.add_argument('--cuda', action='store_true', help='enables cuda')
         parser.add_argument('--ngpu', type=int, default=self.ngpu, help='number of GPUs to use')
         parser.add_argument('--pretrained', help="path to pretrained model (to continue training)")
-        parser.add_argument('--alphabet', type=str, default=self.alphabet)
         parser.add_argument('--exprDir', default=self.exprDir, help='Where to store samples and models')
         parser.add_argument('--displayInterval', type=int, default=self.displayInterval, help='Interval to be displayed')
         parser.add_argument('--nTestDisp', type=int, default=self.nTestDisp, help='Number of samples to display when test')
@@ -122,13 +121,12 @@ class Trainer:
         testDataset = CsvDataset(opt.valRoot, transform=ResizeNormalize((100, 32)))
         valLoader = torch.utils.data.DataLoader(testDataset, shuffle=True, batch_size=opt.batchSize)
 
-        nclass = len(opt.alphabet) + 1
         nc = 1
         
-        converter = StrLabelConverter(opt.alphabet)
+        converter = StrLabelConverter()
         criterion = CTCLoss()
 
-        crnn = CRNN(opt.imgH, nc, nclass, opt.nh)
+        crnn = CRNN(opt.imgH, nc, opt.nh)
         crnn.weightsInit()
         
         if opt.cuda:
@@ -245,7 +243,7 @@ class Trainer:
         return cost
     
     
-    def val(self, max_iter = 10):
+    def val(self, max_iter = 20):
         opt = self.opt
         crnn = self.crnn
         criterion = self.criterion

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # encoding: utf-8
 
+import os
 import collections.abc
 import torch
 import torch.nn as nn
@@ -19,17 +20,8 @@ class StrLabelConverter(object):
         ignore_case (bool, default=True): whether or not to ignore all of the case.
     """
 
-    def __init__(self, alphabet, ignore_case=False):
-        self._ignore_case = ignore_case
-        if self._ignore_case:
-            alphabet = alphabet.lower()
-        self.alphabet = alphabet + '-'  # for `-1` index
-
-        self.dict = {}
-        self.dict['-'] = -1 + 1 # for `-1` index
-        for i, char in enumerate(alphabet):
-            # NOTE: 0 is reserved for 'blank' required by wrap_ctc
-            self.dict[char] = i + 1
+    def __init__(self):
+        pass
 
     def encode(self, text):
         """Support batch or single str.
@@ -42,10 +34,10 @@ class StrLabelConverter(object):
             torch.IntTensor [n]: length of each text.
         """
         if isinstance(text, str):
-            text = [
-                self.dict[char.lower() if self._ignore_case else char]
-                for char in text
-            ]
+            chs = []
+            for ch in text:
+                chs.append(ord(ch))
+            text = chs
             length = [len(text)]
         elif isinstance(text, collections.abc.Iterable):
             length = [len(s) for s in text]
@@ -70,12 +62,18 @@ class StrLabelConverter(object):
             length = length[0]
             assert t.numel() == length, "text with length: {} does not match declared length: {}".format(t.numel(), length)
             if raw:
-                return ''.join([self.alphabet[i - 1] for i in t])
+                char_list = []
+                for i in range(length):
+                    if t[i] != 0:
+                        char_list.append(chr(t[i]))
+                    else:
+                        char_list.append("-")
+                return ''.join(char_list)
             else:
                 char_list = []
                 for i in range(length):
                     if t[i] != 0 and (not (i > 0 and t[i - 1] == t[i])):
-                        char_list.append(self.alphabet[t[i] - 1])
+                        char_list.append(chr(t[i]))
                 return ''.join(char_list)
         else:
             # batch mode
@@ -149,3 +147,20 @@ def assureRatio(img):
         main = nn.UpsamplingBilinear2d(size=(h, h), scale_factor=None)
         img = main(img)
     return img
+
+def lastTrain(path: str) -> str:
+    files = os.listdir(path)
+    lastFile = None
+    lastMTime = 0
+    for item in files:
+        if not item.endswith(".pth"):
+            continue
+        file = f"{path}/{item}"
+        mtime = os.path.getmtime(file)
+        if (mtime > lastMTime):
+            lastMTime = mtime
+            lastFile = file
+        pass
+    if lastFile == None:
+        raise Exception(f"no last **.pth found in `{path}`")
+    return lastFile
