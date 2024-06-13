@@ -21,7 +21,7 @@ class ImgGenerator():
         return text, img
     
     def randomFont(self) -> any:
-        font=ImageFont.truetype('fonts/SIMHEI.TTF',19)
+        font=ImageFont.truetype('assets/fonts/SIMHEI.TTF',19)
         return font
     
     # range(0, 255)

@@ -21,12 +21,12 @@ class DbGenerator():
         pass
     
     def clearDb(self):
-        with open(self.dbFile, 'w') as f:
+        with open(self.dbFile, 'w', encoding="UTF-8") as f:
             f.write("")
         pass
     
     def appendDb(self, text: str):
-        with open(self.dbFile, 'a') as f:
+        with open(self.dbFile, 'a', encoding="UTF-8") as f:
             f.write(text)
         pass
     

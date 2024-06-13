@@ -14,7 +14,7 @@ class CsvDataset(Dataset):
     def __init__(self, root: str, transform=None, target_transform=None):
         annotations_file = f"{root}/_db.csv"
         img_dir = f"{root}"
-        self.img_labels = pd.read_csv(annotations_file, dtype={0:"string", 1: "string"})
+        self.img_labels = pd.read_csv(annotations_file, dtype={0:"string", 1: "string"}, encoding='UTF-8')
         self.img_dir = img_dir
         self.transform = transform
         self.target_transform = target_transform
