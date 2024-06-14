@@ -4,7 +4,7 @@ import crnn.trainer
 from crnn.utils import lastTrain
 
 trainerOpt = crnn.trainer.TrainerOpt()
-trainerOpt.batchSize = 32
+trainerOpt.batchSize = 8
 trainerOpt.adadelta = True
 trainerOpt.cuda = torch.cuda.is_available()
 trainerOpt.trainRoot = "out/db/pretrain/train"

@@ -3,12 +3,13 @@ import random
 
 class TextGeneratorOpt():
     def __init__(self) -> None:
+        self.textsFile = "assets/fonts/texts.txt"
         pass
 
 class TextGenerator():
     def __init__(self, opt: TextGeneratorOpt) -> None:
         self.opt: TextGenerator = opt
-        with open("assets/fonts/texts.txt", encoding="UTF-8") as f:
+        with open(opt.textsFile, encoding="UTF-8") as f:
             self.text = f.read()
         if (self.text == None):
             raise Exception("can not get texts")

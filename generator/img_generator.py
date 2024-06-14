@@ -44,5 +44,11 @@ class ImgGenerator():
         size = (100, 32)
         image=Image.new('RGB', size, bgColor)
         draw = ImageDraw.Draw(image)
-        draw.text((0, 0), text, font=font, fill=fontColor)
+        box = draw.textbbox((0, 0), text, font=font)
+        x,y,x1,y1 = box
+        w,h = size
+        leftW = w - x1 
+        leftH = h - y1
+        # print(f"text:{text} box:{box} leftW:{leftW} leftH:{leftH}")
+        draw.text((random.random() * leftW, random.random() * leftH), text, font=font, fill=fontColor)
         return image

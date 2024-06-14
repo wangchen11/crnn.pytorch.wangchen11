@@ -9,7 +9,7 @@ class DbGeneratorOpt():
         pass
 
 def cvsEncode(text:str) -> str:
-    text.replace('"', '""')
+    text = text.replace('"', '""')
     return f'"{text}"'
 
 class DbGenerator():
