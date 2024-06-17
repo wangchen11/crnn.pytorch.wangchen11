@@ -6,6 +6,7 @@ from generator.text_generator import TextGenerator, TextGeneratorOpt
 
 class ImgGeneratorOpt():
     def __init__(self) -> None:
+        self.fontDir = "assets/fonts/"
         self.textOpt: TextGeneratorOpt = TextGeneratorOpt()
         pass
 
@@ -13,6 +14,8 @@ class ImgGenerator():
     def __init__(self, opt: ImgGeneratorOpt) -> None:
         self.opt: ImgGeneratorOpt = opt
         self.textGenerator: TextGenerator = TextGenerator(opt.textOpt)
+        self.allFontsPath: list = findFonts(opt.fontDir)
+        self.fonts = {}
         pass
     
     def next(self) -> tuple[str, Image.Image]:
@@ -21,7 +24,15 @@ class ImgGenerator():
         return text, img
     
     def randomFont(self) -> any:
-        font=ImageFont.truetype('assets/fonts/SIMHEI.TTF',19)
+        fontPath = self.allFontsPath[int(random.random() * len(self.allFontsPath))]
+        fontSize = random.randint(12, 19)
+        fontKey = f"{fontPath}--{fontSize}"
+        if hasattr(self.fonts, fontKey):
+            font = self.fonts[fontKey]
+        else:
+            # print(f"fontPath:{fontPath}  fontSize:{fontSize}")
+            font=ImageFont.truetype(fontPath, fontSize)
+            self.fonts[fontKey] = font
         return font
     
     # range(0, 255)
@@ -52,3 +63,14 @@ class ImgGenerator():
         # print(f"text:{text} box:{box} leftW:{leftW} leftH:{leftH}")
         draw.text((random.random() * leftW, random.random() * leftH), text, font=font, fill=fontColor)
         return image
+
+
+def findFonts(path: str) -> list:
+    files = os.listdir(path)
+    fontsPath = []
+    for item in files:
+        if not (item.endswith(".ttf") or item.endswith(".TTF")):
+            continue
+        fontsPath.append(f"{path}/{item}")
+        pass
+    return fontsPath

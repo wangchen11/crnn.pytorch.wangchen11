@@ -20,6 +20,11 @@ from crnn.dataset import CsvDataset, AutoGeneratorDataset, AlignCollate, ResizeN
 
 from generator.img_generator import ImgGeneratorOpt
 
+import matplotlib.pyplot as plt
+
+plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
+plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
+        
 class TrainerOpt:
     def __init__(self):
         self.trainRoot: str = "out/db/train/"
@@ -194,6 +199,7 @@ class Trainer:
             trainIter = iter(self.trainLoader)
             i = 0
             while True:
+                self.interruptForUi()
                 for p in crnn.parameters():
                     p.requires_grad = True
                     
@@ -278,6 +284,7 @@ class Trainer:
 
         max_iter = min(max_iter, len(valLoader))
         for i in range(max_iter):
+            self.interruptForUi()
             data = next(val_iter)
             i += 1
             cpu_images, cpu_texts = data
@@ -315,5 +322,37 @@ class Trainer:
 
         accuracy = n_correct / float(n_count)
         print('Test loss: %f, accuray: %f = %d/%d' % (loss_avg.val(), accuracy, n_correct, n_count))
+        #self.showVal(sim_preds, cpu_texts, cpu_images)
         pass
     
+    def interruptForUi(self):
+        plt.pause(0.01)
+        pass
+    
+    def showVal(self, sim_preds, cpu_texts, cpu_images):
+        if hasattr(self, "figure"):
+            figure = self.figure
+        else:
+            figure = plt.figure(figsize=(8, 8))
+        figure.clf()
+        self.figure = figure
+        cols, rows = 4, 5
+        i = 0
+        for pred, gt, img in zip(sim_preds, cpu_texts, cpu_images):
+            i = i+1
+            if(i > cols * rows):
+                break
+            if pred == gt:
+                good = True
+            else:
+                good = False
+            
+            figure.add_subplot(rows, cols, i)
+            title = f"{gt}\n{pred}"
+            # print(f"title:{title}")
+            plt.title(title)
+            plt.axis("off")
+            plt.imshow(img.squeeze(), cmap="gray")
+            pass
+        plt.pause(0.1)
+        pass
