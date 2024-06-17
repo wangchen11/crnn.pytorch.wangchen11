@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 from PIL import Image
 import numpy as np
 
+from generator.img_generator import ImgGenerator, ImgGeneratorOpt
+
 
 class CsvDataset(Dataset):
 
@@ -36,6 +38,25 @@ class CsvDataset(Dataset):
         # print(f"label:{label} image:{image}")
         return (image, label)
 
+class AutoGeneratorDataset(Dataset):
+    def __init__(self, imgOpt: ImgGeneratorOpt, total: int = 64000, transform=None, target_transform=None):
+        self.imgGenerator = ImgGenerator(imgOpt)
+        self.total = total
+        self.transform = transform
+        self.target_transform = target_transform
+
+    def __len__(self):
+        return self.total
+
+    def __getitem__(self, index):
+        label, image = self.imgGenerator.next()
+        image = image.convert('L')
+        if self.transform:
+            image = self.transform(image)
+        if self.target_transform:
+            label = self.target_transform(label)
+        # print(f"label:{label} image:{image}")
+        return (image, label)
 
 class ResizeNormalize(object):
 

@@ -16,12 +16,16 @@ import argparse
 import os
 
 from crnn.crnn import CRNN
-from crnn.dataset import CsvDataset, AlignCollate, ResizeNormalize
+from crnn.dataset import CsvDataset, AutoGeneratorDataset, AlignCollate, ResizeNormalize
+
+from generator.img_generator import ImgGeneratorOpt
 
 class TrainerOpt:
     def __init__(self):
         self.trainRoot: str = "out/db/train/"
         self.valRoot: str  = "out/db/val/"
+        self.trainImgOpt: ImgGeneratorOpt = None
+        self.valImgOpt: ImgGeneratorOpt  = None
         self.workers: int = 0
         self.batchSize: int = 64
         self.imgH: int = 32
@@ -112,13 +116,20 @@ class Trainer:
         sampler = None
         shuffle = True
         
-        trainDataset = CsvDataset(opt.trainRoot)
+        if opt.trainImgOpt:
+            trainDataset = AutoGeneratorDataset(imgOpt=opt.trainImgOpt)
+        else:
+            trainDataset = CsvDataset(opt.trainRoot)
         trainLoader = torch.utils.data.DataLoader(
             trainDataset, batch_size=opt.batchSize,
             shuffle=shuffle, sampler=sampler,
             num_workers=int(opt.workers),
             collate_fn=AlignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio=opt.keepRatio))
-        testDataset = CsvDataset(opt.valRoot, transform=ResizeNormalize((100, 32)))
+        
+        if opt.valImgOpt:
+            testDataset = AutoGeneratorDataset(imgOpt=opt.valImgOpt, transform=ResizeNormalize((100, 32)))
+        else:
+            testDataset = CsvDataset(opt.valRoot, transform=ResizeNormalize((100, 32)))
         valLoader = torch.utils.data.DataLoader(testDataset, shuffle=True, batch_size=opt.batchSize)
 
         nc = 1
