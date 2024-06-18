@@ -9,6 +9,16 @@ class ImgGeneratorOpt():
         self.fontDir = "assets/fonts/"
         self.textOpt: TextGeneratorOpt = TextGeneratorOpt()
         pass
+    
+class ItemProp():
+    def __init__(self) -> None:
+        self.text: str
+        self.imgSize: tuple[int, int]
+        self.fontSize: int
+        self.fontPath: str
+        self.bgColor: tuple[int, int, int]
+        self.fontColor: tuple[int, int, int]
+        pass
 
 class ImgGenerator():
     def __init__(self, opt: ImgGeneratorOpt) -> None:
@@ -18,20 +28,18 @@ class ImgGenerator():
         self.fonts = {}
         pass
     
-    def next(self) -> tuple[str, Image.Image]:
-        text = self.textGenerator.next()
-        img = self.genPic(text)
-        return text, img
+    def next(self) -> tuple[str, Image.Image, ItemProp]:
+        prop = self.genItemProp()
+        img = self.genPic(prop)
+        return prop.text, img, prop
     
-    def randomFont(self) -> any:
-        fontPath = self.allFontsPath[int(random.random() * len(self.allFontsPath))]
-        fontSize = random.randint(12, 19)
-        fontKey = f"{fontPath}--{fontSize}"
+    def getFont(self, prop: ItemProp) -> any:
+        fontKey = f"{prop.fontPath}--{prop.fontSize}"
         if hasattr(self.fonts, fontKey):
             font = self.fonts[fontKey]
         else:
             # print(f"fontPath:{fontPath}  fontSize:{fontSize}")
-            font=ImageFont.truetype(fontPath, fontSize)
+            font=ImageFont.truetype(prop.fontPath, prop.fontSize)
             self.fonts[fontKey] = font
         return font
     
@@ -46,23 +54,30 @@ class ImgGenerator():
             pass
         raise Exception("can not gen a good gray in 10000's loop")
 
-    def genPic(self, text) -> Image.Image:
-        font = self.randomFont()
-        bgGray = self.randomGray()
-        fontGray = self.randomGray(bgGray)
-        bgColor = (bgGray, bgGray, bgGray)
-        fontColor = (fontGray, fontGray, fontGray)
-        size = (100, 32)
-        image=Image.new('RGB', size, bgColor)
+    def genPic(self, prop: ItemProp) -> Image.Image:
+        font = self.getFont(prop)
+        image=Image.new('RGB', prop.imgSize, prop.bgColor)
         draw = ImageDraw.Draw(image)
-        box = draw.textbbox((0, 0), text, font=font)
+        box = draw.textbbox((0, 0), prop.text, font=font)
         x,y,x1,y1 = box
-        w,h = size
+        w,h = prop.imgSize
         leftW = w - x1 
         leftH = h - y1
         # print(f"text:{text} box:{box} leftW:{leftW} leftH:{leftH}")
-        draw.text((random.random() * leftW, random.random() * leftH), text, font=font, fill=fontColor)
+        draw.text((random.random() * leftW, random.random() * leftH), prop.text, font=font, fill=prop.fontColor)
         return image
+    
+    def genItemProp(self) -> ItemProp:
+        prop = ItemProp()
+        prop.text = self.textGenerator.next()
+        prop.imgSize = (100, 32)
+        prop.fontSize = random.randint(12, 19)
+        prop.fontPath = self.allFontsPath[int(random.random() * len(self.allFontsPath))]
+        bgGray = self.randomGray()
+        fontGray = self.randomGray(bgGray)
+        prop.bgColor = (bgGray, bgGray, bgGray)
+        prop.fontColor = (fontGray, fontGray, fontGray)
+        return prop 
 
 
 def findFonts(path: str) -> list:

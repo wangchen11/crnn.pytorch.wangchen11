@@ -33,7 +33,7 @@ class DbGenerator():
     def begin(self, ) -> None:
         os.makedirs(self.opt.dir, exist_ok=True)
         self.clearDb()
-        self.appendDb("image,lable\n")
+        self.appendDb("image,lable,prop\n")
         pass
     
     def end(self, ) -> None:
@@ -41,10 +41,10 @@ class DbGenerator():
     
     def genNext(self, ) -> None:
         self.count = self.count + 1
-        lable, img = self.imgGenerator.next()
+        lable, img, prop = self.imgGenerator.next()
         imgPath = f"{'%06d' % self.count}.png"
         img.save(f"{self.opt.dir}/{imgPath}")
-        self.appendDb(f"{cvsEncode(imgPath)},{cvsEncode(lable)}\n")
+        self.appendDb(f"{cvsEncode(imgPath)},{cvsEncode(lable)},{cvsEncode(str(prop.__dict__))}\n")
         pass
     
     def genNextN(self, count: int) -> None:

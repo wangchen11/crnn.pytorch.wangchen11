@@ -322,18 +322,15 @@ class Trainer:
 
         accuracy = n_correct / float(n_count)
         print('Test loss: %f, accuray: %f = %d/%d' % (loss_avg.val(), accuracy, n_correct, n_count))
-        #self.showVal(sim_preds, cpu_texts, cpu_images)
+        # self.showVal(sim_preds, cpu_texts, cpu_images)
         pass
     
     def interruptForUi(self):
-        plt.pause(0.01)
+        #plt.pause(0.01)
         pass
     
     def showVal(self, sim_preds, cpu_texts, cpu_images):
-        if hasattr(self, "figure"):
-            figure = self.figure
-        else:
-            figure = plt.figure(figsize=(8, 8))
+        figure = plt.figure(figsize=(8, 8))
         figure.clf()
         self.figure = figure
         cols, rows = 4, 5
@@ -354,5 +351,6 @@ class Trainer:
             plt.axis("off")
             plt.imshow(img.squeeze(), cmap="gray")
             pass
-        plt.pause(0.1)
+        plt.pause(10)
+        plt.close(figure)
         pass
