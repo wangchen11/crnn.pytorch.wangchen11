@@ -45,7 +45,7 @@ class TrainerOpt:
         self.displayInterval: int = 50
         self.nTestDisp: int = 64
         self.valInterval: int = 1000
-        self.saveInterval: int = 1000
+        self.saveInterval: int = 5000
         self.lr: float=0.01
         self.beta1: float=0.5
         self.adam: bool = False
